@@ -1,5 +1,8 @@
 # mlbenchmark
-Benchmarking Open Source ML Frameworks (TF, Theano, MXNet, &amp; Caffe). Also Matlab Interface for Entry-Level Engineers on ML Framework
+
+Code Samples Utilized From: gh/jeffheaton [t81_558_deep_learning github], 
+
+# Benchmarking Open Source ML Frameworks (TF, Theano, MXNet, &amp; Caffe). Also Matlab Interface for Entry-Level Engineers on ML Framework
 
 This paper covers a brief comparative study on four frameworks—
 Tensorflow, Theano, MXNet, and Caffe on several aspects: speed, utilization, and scalability
