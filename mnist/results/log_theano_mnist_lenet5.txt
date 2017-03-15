@@ -1,0 +1,205 @@
+... loading data
+... building the model
+conv_lenet5_Theano.py:104: UserWarning: DEPRECATION: the 'ds' parameter is not going to exist anymore as it is going to be replaced by the parameter 'ws'.
+  ignore_border=True
+... training
+training @ iter =  0
+training @ iter =  100
+training @ iter =  200
+training @ iter =  300
+training @ iter =  400
+training @ iter =  500
+training @ iter =  600
+training @ iter =  700
+epoch 1, minibatch 781/781, validation error 3.946314 %
+     epoch 1, minibatch 781/781, test error of best model 4.346955 %
+training @ iter =  800
+training @ iter =  900
+training @ iter =  1000
+training @ iter =  1100
+training @ iter =  1200
+training @ iter =  1300
+training @ iter =  1400
+training @ iter =  1500
+epoch 2, minibatch 781/781, validation error 2.504006 %
+     epoch 2, minibatch 781/781, test error of best model 2.463942 %
+training @ iter =  1600
+training @ iter =  1700
+training @ iter =  1800
+training @ iter =  1900
+training @ iter =  2000
+training @ iter =  2100
+training @ iter =  2200
+training @ iter =  2300
+epoch 3, minibatch 781/781, validation error 2.003205 %
+     epoch 3, minibatch 781/781, test error of best model 1.903045 %
+training @ iter =  2400
+training @ iter =  2500
+training @ iter =  2600
+training @ iter =  2700
+training @ iter =  2800
+training @ iter =  2900
+training @ iter =  3000
+training @ iter =  3100
+epoch 4, minibatch 781/781, validation error 1.802885 %
+     epoch 4, minibatch 781/781, test error of best model 1.612580 %
+training @ iter =  3200
+training @ iter =  3300
+training @ iter =  3400
+training @ iter =  3500
+training @ iter =  3600
+training @ iter =  3700
+training @ iter =  3800
+training @ iter =  3900
+epoch 5, minibatch 781/781, validation error 1.582532 %
+     epoch 5, minibatch 781/781, test error of best model 1.412260 %
+training @ iter =  4000
+training @ iter =  4100
+training @ iter =  4200
+training @ iter =  4300
+training @ iter =  4400
+training @ iter =  4500
+training @ iter =  4600
+epoch 6, minibatch 781/781, validation error 1.462340 %
+     epoch 6, minibatch 781/781, test error of best model 1.372196 %
+training @ iter =  4700
+training @ iter =  4800
+training @ iter =  4900
+training @ iter =  5000
+training @ iter =  5100
+training @ iter =  5200
+training @ iter =  5300
+training @ iter =  5400
+epoch 7, minibatch 781/781, validation error 1.342147 %
+     epoch 7, minibatch 781/781, test error of best model 1.302083 %
+training @ iter =  5500
+training @ iter =  5600
+training @ iter =  5700
+training @ iter =  5800
+training @ iter =  5900
+training @ iter =  6000
+training @ iter =  6100
+training @ iter =  6200
+epoch 8, minibatch 781/781, validation error 1.292067 %
+     epoch 8, minibatch 781/781, test error of best model 1.241987 %
+training @ iter =  6300
+training @ iter =  6400
+training @ iter =  6500
+training @ iter =  6600
+training @ iter =  6700
+training @ iter =  6800
+training @ iter =  6900
+training @ iter =  7000
+epoch 9, minibatch 781/781, validation error 1.252003 %
+     epoch 9, minibatch 781/781, test error of best model 1.191907 %
+training @ iter =  7100
+training @ iter =  7200
+training @ iter =  7300
+training @ iter =  7400
+training @ iter =  7500
+training @ iter =  7600
+training @ iter =  7700
+training @ iter =  7800
+epoch 10, minibatch 781/781, validation error 1.181891 %
+     epoch 10, minibatch 781/781, test error of best model 1.161859 %
+training @ iter =  7900
+training @ iter =  8000
+training @ iter =  8100
+training @ iter =  8200
+training @ iter =  8300
+training @ iter =  8400
+training @ iter =  8500
+epoch 11, minibatch 781/781, validation error 1.171875 %
+     epoch 11, minibatch 781/781, test error of best model 1.131811 %
+training @ iter =  8600
+training @ iter =  8700
+training @ iter =  8800
+training @ iter =  8900
+training @ iter =  9000
+training @ iter =  9100
+training @ iter =  9200
+training @ iter =  9300
+epoch 12, minibatch 781/781, validation error 1.161859 %
+     epoch 12, minibatch 781/781, test error of best model 1.071715 %
+training @ iter =  9400
+training @ iter =  9500
+training @ iter =  9600
+training @ iter =  9700
+training @ iter =  9800
+training @ iter =  9900
+training @ iter =  10000
+training @ iter =  10100
+epoch 13, minibatch 781/781, validation error 1.141827 %
+     epoch 13, minibatch 781/781, test error of best model 1.061699 %
+training @ iter =  10200
+training @ iter =  10300
+training @ iter =  10400
+training @ iter =  10500
+training @ iter =  10600
+training @ iter =  10700
+training @ iter =  10800
+training @ iter =  10900
+epoch 14, minibatch 781/781, validation error 1.081731 %
+     epoch 14, minibatch 781/781, test error of best model 1.051683 %
+training @ iter =  11000
+training @ iter =  11100
+training @ iter =  11200
+training @ iter =  11300
+training @ iter =  11400
+training @ iter =  11500
+training @ iter =  11600
+training @ iter =  11700
+epoch 15, minibatch 781/781, validation error 1.051683 %
+     epoch 15, minibatch 781/781, test error of best model 1.061699 %
+training @ iter =  11800
+training @ iter =  11900
+training @ iter =  12000
+training @ iter =  12100
+training @ iter =  12200
+training @ iter =  12300
+training @ iter =  12400
+epoch 16, minibatch 781/781, validation error 1.041667 %
+     epoch 16, minibatch 781/781, test error of best model 1.091747 %
+training @ iter =  12500
+training @ iter =  12600
+training @ iter =  12700
+training @ iter =  12800
+training @ iter =  12900
+training @ iter =  13000
+training @ iter =  13100
+training @ iter =  13200
+epoch 17, minibatch 781/781, validation error 1.031651 %
+     epoch 17, minibatch 781/781, test error of best model 1.081731 %
+training @ iter =  13300
+training @ iter =  13400
+training @ iter =  13500
+training @ iter =  13600
+training @ iter =  13700
+training @ iter =  13800
+training @ iter =  13900
+training @ iter =  14000
+epoch 18, minibatch 781/781, validation error 1.021635 %
+     epoch 18, minibatch 781/781, test error of best model 1.051683 %
+training @ iter =  14100
+training @ iter =  14200
+training @ iter =  14300
+training @ iter =  14400
+training @ iter =  14500
+training @ iter =  14600
+training @ iter =  14700
+training @ iter =  14800
+epoch 19, minibatch 781/781, validation error 1.011619 %
+     epoch 19, minibatch 781/781, test error of best model 1.031651 %
+training @ iter =  14900
+training @ iter =  15000
+training @ iter =  15100
+training @ iter =  15200
+training @ iter =  15300
+training @ iter =  15400
+training @ iter =  15500
+training @ iter =  15600
+epoch 20, minibatch 781/781, validation error 0.981571 %
+     epoch 20, minibatch 781/781, test error of best model 1.011619 %
+Optimization complete.
+Best validation score of 0.981571 % obtained at iteration 15620, with test performance 1.011619 %
+The code for file conv_lenet5_Theano.py ran for 27.12m
