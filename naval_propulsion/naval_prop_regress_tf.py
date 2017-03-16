@@ -67,18 +67,16 @@ def get_model_dir(name,erase):
 def model_fn(features, targets, mode, params):
   # Connect the first hidden layer to input layer
   # (features) with relu activation
-    first_hidden_layer = tf.contrib.layers.relu(features, 525) 
-
+    first_hidden_layer = tf.contrib.layers.relu(features, 500) 
     # Connect the second hidden layer to first hidden layer with relu
-    second_hidden_layer = tf.contrib.layers.relu(first_hidden_layer, 125)
-	
-	third_hidden_layer = tf.contrib.layers.relu(second_hidden_layer, 65)
- 
+    second_hidden_layer = tf.contrib.layers.relu(first_hidden_layer, 250)
+    third_hidden_layer = tf.contrib.layers.relu(second_hidden_layer, 5)
     # Connect the output layer to second hidden layer (no activation fn)
-    output_layer = tf.contrib.layers.linear(third_hidden_layer, 2)
+    output_layer = tf.contrib.layers.linear(third_hidden_layer, 1)
  
     # Reshape output layer to 1-dim Tensor to return predictions
-    predictions = tf.reshape(output_layer, [-1,2])
+    #predictions = tf.reshape(output_layer, [-1,2])
+	predictions = tf.reshape(output_layer, [-1])
     predictions_dict = {"prediction": predictions}
 
     # Calculate loss using mean squared error
@@ -103,7 +101,7 @@ def model_fn(features, targets, mode, params):
         train_op=train_op,
         eval_metric_ops=eval_metric_ops)
 
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.000001
 path = "./data/"
 
 filename_read = os.path.join(path,"naval_propulsion.csv")
@@ -117,7 +115,6 @@ encode_numeric_zscore(df,'gg_revs')
 encode_numeric_zscore(df,'star_prop_torque')
 encode_numeric_zscore(df,'port_prop_torque')
 encode_numeric_zscore(df,'hp_exit_temp')
-encode_numeric_zscore(df,'gt_in_airT')
 encode_numeric_zscore(df,'gt_out_airT')
 encode_numeric_zscore(df,'HP_exit_pres')
 encode_numeric_zscore(df,'GT_in_pres')
@@ -126,7 +123,11 @@ encode_numeric_zscore(df,'gas_exhaust_pres')
 encode_numeric_zscore(df,'turb_injec')
 encode_numeric_zscore(df,'fuel_flow')
 
-x,y = to_xy(df,['GT_compre_coef','GT_turb_coef'])
+df = df.drop('gt_in_airT',1)
+
+x,y = to_xy(df,'GT_compre_coef')
+
+#x,y = to_xy(df,['GT_compre_coef','GT_turb_coef'])
 
 X_train, x_test, y_train, y_test = train_test_split(
     x, y, test_size=0.20, random_state=42)
@@ -139,7 +140,7 @@ nn = tf.contrib.learn.Estimator(
     model_fn=model_fn, params=model_params)
 
 	# Need to set batch size
-nn.fit(X_train,y_train,steps=5000)
+nn.fit(X_train,y_train,steps=15000,batch_size=128)
 
 ev = nn.evaluate(x=x_test, y=y_test, steps=1)
 loss_score = ev["loss"]
