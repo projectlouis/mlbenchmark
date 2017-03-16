@@ -1,0 +1,15 @@
+train_net: "airfoil/mlp_auto_train.prototxt"
+test_net: "airfoil/mlp_auto_test.prototxt"
+test_iter: 250
+test_interval: 1000
+base_lr: 0.001
+display: 1000
+max_iter: 10000
+lr_policy: "step"
+gamma: 0.1
+momentum: 0.9
+weight_decay: 0.0005
+stepsize: 5000
+snapshot: 10000
+snapshot_prefix: "airfoil"
+solver_mode: CPU
