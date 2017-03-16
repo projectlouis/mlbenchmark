@@ -132,16 +132,11 @@ encode_numeric_zscore(df,'Chord_m')
 encode_numeric_zscore(df,'V_inf_mps')
 encode_numeric_zscore(df,'displ_thick_m')
 
-print(df)
-
 x_out,y_out = to_xy(df,'sound_db')
 
 X_train, X_test, y_train, y_test = train_test_split(
     x_out, y_out, test_size=0.20, random_state=42)
 
-print(X_train);
-print(y_train);
-	
 # Write out the data to HDF5 files in a temp directory.
 # This file is assumed to be caffe_root/examples/hdf5_classification.ipynb
 dirname = os.path.abspath('./airfoil')
@@ -160,10 +155,6 @@ with open(os.path.join(dirname, 'train.txt'), 'w') as f:
     f.write(train_filename + '\n')
     f.write(train_filename + '\n')
 
-df = pd.read_hdf('airfoil/train.h5');
-print(df.shape)
-print(df.iloc[0]);
-	
 # HDF5 is pretty efficient, but can be further compressed.
 comp_kwargs = {'compression': 'gzip', 'compression_opts': 1}
 with h5py.File(test_filename, 'w') as f:
