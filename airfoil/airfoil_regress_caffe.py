@@ -28,7 +28,7 @@ def solver(train_net_path, test_net_path):
     s.test_interval = 1000  # Test after every 1000 training iterations.
     s.test_iter.append(250) # Test 250 "batches" each time we test.
 
-    s.max_iter = 10000      # # of times to update the net (training iterations)
+    s.max_iter = 58710      # # of times to update the net (training iterations)
 
     # Set the initial learning rate for stochastic gradient descent (SGD).
     s.base_lr = 0.001        
@@ -60,11 +60,11 @@ def solver(train_net_path, test_net_path):
 
     # We'll train on the CPU for fair benchmarking against scikit-learn.
     # Changing to GPU should result in much faster training!
-    s.solver_mode = caffe_pb2.SolverParameter.CPU
-    
+    s.type = 'Adam'
+    #s.solver_mode = caffe_pb2.SolverParameter.CPU
+    s.solver_mode = 0
+	
     return s
-
-
 
 # Encode a numeric column as zscores
 def encode_numeric_zscore(df,name,mean=None,sd=None):
@@ -112,9 +112,8 @@ def mlp(inputfile, batch_size):
     net.relu1 = cl.ReLU(net.fc1, in_place=True)
     net.fc2 = cl.InnerProduct(net.relu1, num_output=5, weight_filler=dict(type='xavier'))
     net.relu2 = cl.ReLU(net.fc2, in_place=True)
-    net.fc3 = cl.InnerProduct(net.relu1, num_output=1, weight_filler=dict(type='xavier'))
-    net.relu3 = cl.ReLU(net.fc3, in_place=True)
-    net.loss = cl.SoftmaxWithLoss(net.relu3, net.label)
+    net.fc3 = cl.InnerProduct(net.relu2, num_output=1, weight_filler=dict(type='xavier'))
+    net.loss = cl.EuclideanLoss(net.fc3, net.label)
 
     return net.to_proto()
     
@@ -148,47 +147,70 @@ test_filename = os.path.join(dirname, 'test.h5')
 
 # HDF5DataLayer source should be a file containing a list of HDF5 filenames.
 # To show this off, we'll list the same data file twice.
-with h5py.File(train_filename, 'w') as f:
-    f['data'] = X_train
-    f['label'] = y_train.astype(np.float32)
+
+f = h5py.File(train_filename, "w")
+f.create_dataset("data", data=X_train,  compression="gzip", compression_opts=4)
+f.create_dataset("label", data=y_train,  compression="gzip", compression_opts=4)
+f.close()
+
+
+
+#with h5py.File(train_filename, 'w') as f:
+#    f['data'] = X_train
+#    f['label'] = y_train.astype(np.float32)
 with open(os.path.join(dirname, 'train.txt'), 'w') as f:
     f.write(train_filename + '\n')
-    f.write(train_filename + '\n')
+#    f.write(train_filename + '\n')
 
+f.close();
+	
 # HDF5 is pretty efficient, but can be further compressed.
-comp_kwargs = {'compression': 'gzip', 'compression_opts': 1}
-with h5py.File(test_filename, 'w') as f:
-    f.create_dataset('data', data=X_test, **comp_kwargs)
-    f.create_dataset('label', data=y_test.astype(np.float32), **comp_kwargs)
+#comp_kwargs = {'compression': 'gzip', 'compression_opts': 1}
+#with h5py.File(test_filename, 'w') as f:
+#    f.create_dataset('data', data=X_test, **comp_kwargs)
+#    f.create_dataset('label', data=y_test.astype(np.float32), **comp_kwargs)
+
+f = h5py.File(test_filename, "w")
+f.create_dataset("data", data=X_test,  compression="gzip", compression_opts=4)
+f.create_dataset("label", data=y_test,  compression="gzip", compression_opts=4)
+f.close()
+
 with open(os.path.join(dirname, 'test.txt'), 'w') as f:
     f.write(test_filename + '\n')
-
+f.close();
+	
 train_net_path = 'airfoil/mlp_auto_train.prototxt'
 with open(train_net_path, 'w') as f:
-    f.write(str(mlp('airfoil/train.txt', 100)))
+    f.write(str(mlp('airfoil/train.txt', BATCH_SIZE)))
 
+f.close();
+	
 test_net_path = 'airfoil/mlp_auto_test.prototxt'
 with open(test_net_path, 'w') as f:
-    f.write(str(mlp('airfoil/test.txt', 100)))
+    f.write(str(mlp('airfoil/test.txt', BATCH_SIZE)))
+
+f.close();
 	
-solver_path = 'airfoil/mlp_solver.prototxt'
+solver_path = 'mlp_solver.prototxt'
 with open(solver_path, 'w') as f:
     f.write(str(solver(train_net_path, test_net_path)))
 	
-caffe.set_device(0)
+f.close();
+	
+#caffe.set_device(0)
 caffe.set_mode_cpu()
 solver = caffe.get_solver(solver_path)
 solver.solve()
 
-accuracy = 0
-batch_size = solver.test_nets[0].blobs['data'].num
-test_iters = int(len(Xt) / batch_size)
-for i in range(test_iters):
-    solver.test_nets[0].forward()
-    accuracy += solver.test_nets[0].blobs['accuracy'].data
-accuracy /= test_iters
+#accuracy = 0
+#batch_size = solver.test_nets[0].blobs['data'].num
+#test_iters = int(len(X_test) / batch_size)
+#for i in range(test_iters):
+#    solver.test_nets[0].forward()
+#    accuracy += solver.test_nets[0].blobs['accuracy'].data
+#accuracy /= test_iters
 
-print("Accuracy: {:.3f}".format(accuracy))
+#print("Accuracy: {:.3f}".format(accuracy))
 
 
 #!./build/tools/caffe train -solver examples/hdf5_classification/mlp_solver.prototxt
