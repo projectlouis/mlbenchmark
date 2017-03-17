@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from tensorflow.contrib.learn.python.learn.estimators import model_fn as model_fn_lib
 from sklearn.model_selection import train_test_split
 
+tf.logging.set_verbosity(tf.logging.INFO)
+
 # Encode a numeric column as zscores
 def encode_numeric_zscore(df,name,mean=None,sd=None):
     if mean is None:
@@ -76,7 +78,7 @@ def model_fn(features, targets, mode, params):
  
     # Reshape output layer to 1-dim Tensor to return predictions
     #predictions = tf.reshape(output_layer, [-1,2])
-	predictions = tf.reshape(output_layer, [-1])
+    predictions = tf.reshape(output_layer,[-1])
     predictions_dict = {"prediction": predictions}
 
     # Calculate loss using mean squared error
@@ -102,6 +104,7 @@ def model_fn(features, targets, mode, params):
         eval_metric_ops=eval_metric_ops)
 
 LEARNING_RATE = 0.000001
+BATCH_SIZE = 128
 path = "./data/"
 
 filename_read = os.path.join(path,"naval_propulsion.csv")
@@ -126,6 +129,7 @@ encode_numeric_zscore(df,'fuel_flow')
 df = df.drop('gt_in_airT',1)
 
 x,y = to_xy(df,'GT_compre_coef')
+#x,y = to_xy(df,'GT_turb_coef')
 
 #x,y = to_xy(df,['GT_compre_coef','GT_turb_coef'])
 
@@ -139,8 +143,17 @@ model_params = {"learning_rate": LEARNING_RATE}
 nn = tf.contrib.learn.Estimator(
     model_fn=model_fn, params=model_params)
 
+validation_monitor = tf.contrib.learn.monitors.ValidationMonitor(
+    x_test,
+    y_test,
+    every_n_steps=100,
+    early_stopping_metric="loss",
+    early_stopping_metric_minimize=True,
+    early_stopping_rounds=200)
+
 	# Need to set batch size
-nn.fit(X_train,y_train,steps=15000,batch_size=128)
+nn.fit(X_train,y_train,steps=115000,batch_size=BATCH_SIZE,monitors=[validation_monitor])
+
 
 ev = nn.evaluate(x=x_test, y=y_test, steps=1)
 loss_score = ev["loss"]
@@ -152,3 +165,12 @@ df2 = pd.concat([df,predDF,pd.DataFrame(y)],axis=1)
 
 df2.columns = list(df.columns)+['pred','ideal']
 print(df2)
+
+# Create a Pandas Excel writer using XlsxWriter as the engine.
+writer = pd.ExcelWriter('naval_regression_tf.xlsx', engine='xlsxwriter')
+
+# Convert the dataframe to an XlsxWriter Excel object.
+df2.to_excel(writer, sheet_name='Sheet1')
+
+# Close the Pandas Excel writer and output the Excel file.
+writer.save()
