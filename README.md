@@ -19,6 +19,16 @@ All experiments are performed on a single machine running on Windows 10 Pro (64 
 4790K CPU @ 4.00GHz 3.60 GHz; Nvidia GeForce GTX 750 Ti (Ver. 378.66); 16 GiB DDR3 memory; and WD
 Blue HDD. Table 1 below shows the software framework and versions utilized for the evaluation
 
+| Framework |	Tensorflow |	Theano |	MXNet |	Caffe |
+| --- | --- | --- | --- | --- |
+| Version |	R1.00 |	0.8.2 |	0.9.3 |	1.0.0.rc3 |
+| Core Language |	C++, Python |	Python |	C++ |	C++ |
+| Interface Language |	C++, Python |	Python |	C++, Python, Julia, Matlab, Javascript, Go, R, Scala |	C, C++, Python, Matlab |
+| cuDNN Support |	V5.1 |	V5 |	v.5.1 |	V5.0 |
+| Python Version |	V3.5 |	V2.7 |	V2.7 |	V2.7 |
+| Docker Image Pulled |	Latest:py3 |	Latest | Latest	| Latest |
+
+
 Docker v.1.13.1 for Windows was chosen as the deployment
 software configuration controller for each set of experiments to be
 run in isolated containers via HyperV. Figure 2 shows how Docker
