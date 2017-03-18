@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 import lasagne
 from lasagne import layers
 from nolearn.lasagne import NeuralNet
+from nolearn.lasagne import BatchIterator
 from lasagne import nonlinearities
 import time
 
@@ -16,22 +17,26 @@ srng = RandomStreams()
 
 
 def build_mlp(input_var=None):
-    l_in = lasagne.layers.InputLayer(shape=(None, 5), input_var=input_var)
-    l_hid1 = lasagne.layers.DenseLayer(
+    l_in = layers.InputLayer(shape=(None, 5), input_var=input_var)
+    l_hid1 = layers.DenseLayer(
             l_in, num_units=25,
             nonlinearity=nonlinearities.rectify)
-    l_hid2 = lasagne.layers.DenseLayer(
+    l_hid2 = layers.DenseLayer(
             l_hid1, num_units=5,
             nonlinearity=nonlinearities.rectify)
-    l_out = lasagne.layers.DenseLayer(
+    l_out = layers.DenseLayer(
             l_hid2, num_units=1,
             nonlinearity=None)
 			
     net = NeuralNet(l_out, 
 					regression=True,
 					update_learning_rate = 0.001,
-                    update=lasagne.updates.adam,
-					max_epochs = 5000,
+					batch_iterator_train = BatchIterator(batch_size=128),
+					batch_iterator_test = BatchIterator(batch_size=128),
+					update=lasagne.updates.adam,
+					max_epochs = 500,
+					eval_size = 0.2,
+					objective_loss_function = lasagne.objectives.squared_error,
 					verbose=1)
     return net
 
@@ -99,8 +104,9 @@ encode_numeric_zscore(df,'displ_thick_m')
 
 x_out,y_out = to_xy(df,'sound_db')
 
+# Test Evaluation completed inside NeuralNet callout (eval_size)
 X_train, x_test, y_train, y_test = train_test_split(
-    x_out, y_out, test_size=0.20, random_state=42)
+    x_out, y_out, test_size=0, random_state=42)
 
 print(X_train);
 
@@ -128,4 +134,11 @@ valid_loss = np.array([i["valid_loss"] for i in network.train_history_])
 print("Root Mean Square Error:")
 print(valid_loss[-1])
 
+# Create a Pandas Excel writer using XlsxWriter as the engine.
+writer = pd.ExcelWriter('airfoil_regression_theano.xlsx', engine='xlsxwriter')
 
+# Convert the dataframe to an XlsxWriter Excel object.
+df2.to_excel(writer, sheet_name='Sheet1')
+
+# Close the Pandas Excel writer and output the Excel file.
+writer.save()
