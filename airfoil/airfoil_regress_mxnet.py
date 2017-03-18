@@ -117,7 +117,7 @@ model.fit(trainIter,
 		  optimizer_params={'learning_rate':LEARNING_RATE},
 		  batch_end_callback=mx.callback.Speedometer(1,50), 
 		  epoch_end_callback=None, 
-		  eval_metric='rmse',
+		  eval_metric='mse',
 		  optimizer='adam')
 
 		  
