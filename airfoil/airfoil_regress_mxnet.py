@@ -56,14 +56,6 @@ def to_xy(df,target):
         # Regression
         return df.as_matrix(result).astype(np.float64),df.as_matrix([target]).astype(np.float64)
 
-def get_model_dir(name,erase):
-    base_path = os.path.join(".","saved_models")
-    model_dir = os.path.join(base_path,name)
-    os.makedirs(model_dir,exist_ok=True)
-    if erase and len(model_dir)>4 and os.path.isdir(model_dir):
-        shutil.rmtree(model_dir,ignore_errors=True) # be careful, this deletes everything below the specified path
-    return model_dir
-	
 LEARNING_RATE = 0.001
 BATCH_SIZE = 128;
 path = "./data/"
