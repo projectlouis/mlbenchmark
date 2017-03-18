@@ -28,7 +28,8 @@ def solver(train_net_path, test_net_path):
     s.test_interval = 1000  # Test after every 1000 training iterations.
     s.test_iter.append(250) # Test 250 "batches" each time we test.
 
-    s.max_iter = 58710      # # of times to update the net (training iterations)
+	# 500 Epochs --> (500 Epoch * 1503 # Samples)/(128 Batch Size) = Iterations
+    s.max_iter = 5871      # # of times to update the net (training iterations)
 
     # Set the initial learning rate for stochastic gradient descent (SGD).
     s.base_lr = 0.001        
@@ -47,8 +48,8 @@ def solver(train_net_path, test_net_path):
     s.momentum = 0.9
     s.weight_decay = 5e-4
 
-    # Display the current training loss and accuracy every 1000 iterations.
-    s.display = 1000
+    # Display the current training loss and accuracy every 100 iterations.
+    s.display = 100
 
     # Snapshots are files used to store networks we've trained.  Here, we'll
     # snapshot every 10K iterations -- just once at the end of training.
@@ -108,7 +109,7 @@ def mlp(inputfile, batch_size):
     net = caffe.NetSpec()
     
     net.data, net.label = cl.HDF5Data(batch_size=batch_size, source=inputfile, ntop=2)
-    net.fc1 = cl.InnerProduct(net.data, num_output=20, weight_filler=dict(type='xavier'))
+    net.fc1 = cl.InnerProduct(net.data, num_output=25, weight_filler=dict(type='xavier'))
     net.relu1 = cl.ReLU(net.fc1, in_place=True)
     net.fc2 = cl.InnerProduct(net.relu1, num_output=5, weight_filler=dict(type='xavier'))
     net.relu2 = cl.ReLU(net.fc2, in_place=True)
