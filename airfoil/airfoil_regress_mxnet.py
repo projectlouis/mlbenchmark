@@ -97,29 +97,36 @@ X_train, X_test, y_train, y_test = train_test_split(
 trainIter = mx.io.NDArrayIter(data = X_train, label = y_train, batch_size = BATCH_SIZE)
 valIter   = mx.io.NDArrayIter(data = X_test , label = y_test , batch_size = BATCH_SIZE)
 
-	
+
 print("Building model and compiling functions...")
 #
 # Get model and train
 #
 net = build_mlp()
 
-model = mx.model.FeedForward(symbol = net,
-        num_epoch          = 500,
-        learning_rate      = LEARNING_RATE,
-        optimizer='adam')
+model = mx.mod.Module(symbol = net,
+		label_names = ['softmax_label'],
+		data_names = ['data'])
 
 logging.basicConfig(level=logging.INFO)
 
 print("Fitting Network...")
-model.fit(X=trainIter, 
-		  eval_data=valIter, 
+model.fit(trainIter, 
+		  eval_data=valIter,
+		  num_epoch = 5000,
+		  optimizer_params={'learning_rate':LEARNING_RATE},
 		  batch_end_callback=mx.callback.Speedometer(1,50), 
 		  epoch_end_callback=None, 
-		  eval_metric='rmse')
+		  eval_metric='rmse',
+		  optimizer='adam')
 
-pred = list(model.predict(x_out));
-predDF = pd.DataFrame(pred)
+		  
+# Create a ND Iter Format
+predIter = mx.io.NDArrayIter(data = [x_out], batch_size = BATCH_SIZE)
+
+pred = model.predict(predIter);
+
+predDF = pd.DataFrame(pred.asnumpy())
 df2 = pd.concat([df,predDF,pd.DataFrame(y_out)],axis=1)
 
 df2.columns = list(df.columns)+['pred','ideal']
