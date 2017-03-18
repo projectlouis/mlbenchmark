@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from tensorflow.contrib.learn.python.learn.estimators import model_fn as model_fn_lib
 from sklearn.model_selection import train_test_split
 
+tf.logging.set_verbosity(tf.logging.INFO)
+
 # Encode a numeric column as zscores
 def encode_numeric_zscore(df,name,mean=None,sd=None):
     if mean is None:
@@ -43,13 +45,6 @@ def to_xy(df,target):
     else:
         # Regression
         return df.as_matrix(result).astype(np.float64),df.as_matrix([target]).astype(np.float64)
-
-# Nicely formatted time string
-def hms_string(sec_elapsed):
-    h = int(sec_elapsed / (60 * 60))
-    m = int((sec_elapsed % (60 * 60)) / 60)
-    s = sec_elapsed % 60
-    return "{}:{:>02}:{:>05.2f}".format(h, m, s)
 
 # Regression chart, we will see more of this chart in the next class.
 def chart_regression(pred,y):
@@ -108,6 +103,7 @@ def model_fn(features, targets, mode, params):
         train_op=train_op,
         eval_metric_ops=eval_metric_ops)
 
+BATCH_SIZE = 128
 LEARNING_RATE = 0.001
 path = "./data/"
 
@@ -132,8 +128,21 @@ model_params = {"learning_rate": LEARNING_RATE}
 nn = tf.contrib.learn.Estimator(
     model_fn=model_fn, params=model_params)
 
+validation_monitor = tf.contrib.learn.monitors.ValidationMonitor(
+    x_test,
+    y_test,
+    every_n_steps=100,
+    early_stopping_metric="loss",
+    early_stopping_metric_minimize=True,
+    early_stopping_rounds=200)
+
 	# Need to set batch size
-nn.fit(X_train,y_train,steps=5000)
+# 500 epochs --> (500 * 1503) / 128
+nn.fit(X_train,
+		y_train,
+		steps=58701,
+		batch_size=BATCH_SIZE,
+		monitors=[validation_monitor])
 
 ev = nn.evaluate(x=x_test, y=y_test, steps=1)
 loss_score = ev["loss"]
@@ -144,4 +153,13 @@ predDF = pd.DataFrame(pred)
 df2 = pd.concat([df,predDF,pd.DataFrame(y)],axis=1)
 
 df2.columns = list(df.columns)+['pred','ideal']
-df2
+print(df2)
+
+# Create a Pandas Excel writer using XlsxWriter as the engine.
+writer = pd.ExcelWriter('airfoil_regression_tf.xlsx', engine='xlsxwriter')
+
+# Convert the dataframe to an XlsxWriter Excel object.
+df2.to_excel(writer, sheet_name='Sheet1')
+
+# Close the Pandas Excel writer and output the Excel file.
+writer.save()
