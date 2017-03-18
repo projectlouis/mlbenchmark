@@ -10,6 +10,7 @@ import lasagne
 from lasagne import layers
 from nolearn.lasagne import NeuralNet
 from nolearn.lasagne import BatchIterator
+from nolearn.lasagne import TrainSplit
 from lasagne import nonlinearities
 import time
 
@@ -34,8 +35,8 @@ def build_mlp(input_var=None):
 					batch_iterator_train = BatchIterator(batch_size=128),
 					batch_iterator_test = BatchIterator(batch_size=128),
 					update=lasagne.updates.adam,
-					max_epochs = 500,
-					eval_size = 0.2,
+					max_epochs = 5000,
+					train_split = TrainSplit(eval_size=0.2),
 					objective_loss_function = lasagne.objectives.squared_error,
 					verbose=1)
     return net
