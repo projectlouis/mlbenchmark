@@ -41,7 +41,7 @@ Each Machine Learning Framework in Table 1 were run separately
 from one another (e.g. using all CPU resources on its own and not
 sharing between other frameworks).
 
-blend of 5 different Docker plugins were utilized to capture each containers specific CPU usage and memory
+5 different Docker plugins were utilized to capture each containers specific CPU usage and memory
 usage. Prometheus, AlertManager, Grafana, NodeExporter, and cAdvisor were compiled in separate Docker
 containers and communicated via localhost proxies. These overlaying containers were segregated from one another
 when collecting each of the performance metrics over each set of runs. Figure 3 shows how each container reports its
