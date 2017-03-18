@@ -105,7 +105,7 @@ print("Building model and compiling functions...")
 net = build_mlp()
 
 model = mx.model.FeedForward(symbol = net,
-        num_epoch          = 5000,
+        num_epoch          = 500,
         learning_rate      = LEARNING_RATE,
         optimizer='adam')
 
@@ -126,5 +126,11 @@ df2.columns = list(df.columns)+['pred','ideal']
 print(df2)
 
 
+# Create a Pandas Excel writer using XlsxWriter as the engine.
+writer = pd.ExcelWriter('airfoil_regression_mxnet.xlsx', engine='xlsxwriter')
 
+# Convert the dataframe to an XlsxWriter Excel object.
+df2.to_excel(writer, sheet_name='Sheet1')
 
+# Close the Pandas Excel writer and output the Excel file.
+writer.save()
