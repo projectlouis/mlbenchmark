@@ -63,18 +63,6 @@ def get_model_dir(name,erase):
     if erase and len(model_dir)>4 and os.path.isdir(model_dir):
         shutil.rmtree(model_dir,ignore_errors=True) # be careful, this deletes everything below the specified path
     return model_dir
-
-def iterate_minibatches(inputs, targets, batchsize, shuffle=True):
-    assert len(inputs) == len(targets)
-    if shuffle:
-        indices = np.arange(len(inputs))
-        np.random.shuffle(indices)
-    for start_idx in range(0, len(inputs) - batchsize + 1, batchsize):
-        if shuffle:
-            excerpt = indices[start_idx:start_idx + batchsize]
-        else:
-            excerpt = slice(start_idx, start_idx + batchsize)
-        yield inputs[excerpt], targets[excerpt]
 	
 LEARNING_RATE = 0.001
 BATCH_SIZE = 128;
