@@ -1,50 +1,29 @@
-import theano
-from theano import tensor as T
-from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
+import mxnet as mx
 import numpy as np
 import pandas as pd
 import os
 import shutil
 from sklearn.model_selection import train_test_split
-import lasagne
-from lasagne import layers
-from nolearn.lasagne import NeuralNet
-from nolearn.lasagne import BatchIterator
-from nolearn.lasagne import TrainSplit
-from lasagne import nonlinearities
 import time
+import logging
 
-srng = RandomStreams()
+def build_mlp():
+	"""
+	multi-layer perceptron
+	"""
 
-
-def build_mlp(input_var=None):
-## The input # needs to change according to # of inputs
-    l_in = lasagne.layers.InputLayer(shape=(None, 15), input_var=input_var)
-    l_hid1 = lasagne.layers.DenseLayer(
-            l_in, num_units=500,
-            nonlinearity=nonlinearities.rectify)
-    l_hid2 = lasagne.layers.DenseLayer(
-            l_hid1, num_units=250,
-            nonlinearity=nonlinearities.rectify)
-    l_hid3 = lasagne.layers.DenseLayer(
-            l_hid2, num_units=5,
-            nonlinearity=nonlinearities.rectify)
-    l_out = lasagne.layers.DenseLayer(
-            l_hid3, num_units=1,
-            nonlinearity=None)
-			
-    net = NeuralNet(l_out, 
-					regression=True,
-					update_learning_rate = 0.000001,
-					batch_iterator_train = BatchIterator(batch_size=128),
-					batch_iterator_test = BatchIterator(batch_size=128),
-					update=lasagne.updates.adam,
-					max_epochs = 1235,
-					train_split = TrainSplit(eval_size=0.2),
-					objective_loss_function = lasagne.objectives.squared_error,
-					verbose=1)
-    return net
-
+	outLabl = mx.sym.Variable('softmax_label')
+	data = mx.symbol.Variable('data')
+	flat = mx.symbol.Flatten(data=data)
+	fc1  = mx.symbol.FullyConnected(data = flat, name='fc1', num_hidden=500)
+	act1 = mx.symbol.Activation(data = fc1, name='relu1', act_type="relu")
+	fc2  = mx.symbol.FullyConnected(data = act1, name='fc2', num_hidden=250)
+	act2 = mx.symbol.Activation(data = fc2, name='relu2', act_type="relu")
+	fc3  = mx.symbol.FullyConnected(data = act2, name='fc3', num_hidden=5)
+	act3 = mx.symbol.Activation(data = fc3, name='relu3', act_type="relu")
+	fc4  = mx.symbol.FullyConnected(data = act3, name='fc4', num_hidden=1)
+	net  = mx.symbol.LinearRegressionOutput(data=fc4, label=outLabl, name='linreg1')
+	return net
 
 # Encode a numeric column as zscores
 def encode_numeric_zscore(df,name,mean=None,sd=None):
@@ -93,9 +72,9 @@ def iterate_minibatches(inputs, targets, batchsize, shuffle=True):
         else:
             excerpt = slice(start_idx, start_idx + batchsize)
         yield inputs[excerpt], targets[excerpt]
-### BELOW HERE CHANGED
+	
 LEARNING_RATE = 0.000001
-BATCH_SIZE = 128
+BATCH_SIZE = 128;
 path = "./data/"
 
 filename_read = os.path.join(path,"naval_propulsion.csv")
@@ -119,45 +98,60 @@ encode_numeric_zscore(df,'fuel_flow')
 
 df = df.drop('gt_in_airT',1)
 
-print(df)
+x_out,y_out = to_xy(df,'GT_turb_coef')
+#x_out,y_out = to_xy(df,'GT_compre_coef')
 
-#x_out,y_out = to_xy(df,'GT_turb_coef')
-x_out,y_out = to_xy(df,'GT_compre_coef')
-## ABOVE HERE CHANGED
-X_train, x_test, y_train, y_test = train_test_split(
-    x_out, y_out, test_size=0, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    x_out, y_out, test_size=0.20, random_state=42)
 
 X_train = X_train[:,0:15]
-x_test = x_test[:,0:15]
+X_test = X_test[:,0:15]
 x_out = x_out[:,0:15]
-
+	
 print(x_out.shape);
 print(X_train.shape);
 print(y_train.shape);
-
-X = T.matrix()
-Y = T.matrix()
 	
+trainIter = mx.io.NDArrayIter(data = X_train, label = y_train, batch_size = BATCH_SIZE)
+valIter   = mx.io.NDArrayIter(data = X_test , label = y_test , batch_size = BATCH_SIZE)
+
+
 print("Building model and compiling functions...")
-network = build_mlp(X)
+#
+# Get model and train
+#
+net = build_mlp()
+
+model = mx.mod.Module(symbol = net,
+		label_names = ['softmax_label'],
+		data_names = ['data'])
+
+logging.basicConfig(level=logging.INFO)
 
 print("Fitting Network...")
-network.fit(X_train,y_train);
+model.fit(trainIter, 
+		  eval_data=valIter,
+		  num_epoch = 1235,
+		  optimizer_params={'learning_rate':LEARNING_RATE},
+		  epoch_end_callback=None, 
+		  eval_metric='mse',
+		  optimizer='adam')
 
-print(network.score(X_train,y_train));
+		  
+# Create a ND Iter Format
+predIter = mx.io.NDArrayIter(data = x_out, batch_size = BATCH_SIZE)
 
+pred = model.predict(predIter);
 
-pred = list(network.predict(x_out));
-predDF = pd.DataFrame(pred)
+predDF = pd.DataFrame(pred.asnumpy())
 df2 = pd.concat([df,predDF,pd.DataFrame(y_out)],axis=1)
 
 df2.columns = list(df.columns)+['pred','ideal']
 print(df2)
 
-valid_loss = np.array([i["valid_loss"] for i in network.train_history_])
 
 # Create a Pandas Excel writer using XlsxWriter as the engine.
-writer = pd.ExcelWriter('naval_regression_theano_compressor.xlsx', engine='xlsxwriter')
+writer = pd.ExcelWriter('naval_regression_mxnet.xlsx', engine='xlsxwriter')
 
 # Convert the dataframe to an XlsxWriter Excel object.
 df2.to_excel(writer, sheet_name='Sheet1')

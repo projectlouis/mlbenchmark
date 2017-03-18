@@ -102,7 +102,7 @@ def model_fn(features, targets, mode, params):
         loss=loss,
         train_op=train_op,
         eval_metric_ops=eval_metric_ops)
-
+### BELOW HERE CHANGED
 LEARNING_RATE = 0.000001
 BATCH_SIZE = 128
 path = "./data/"
@@ -130,7 +130,7 @@ df = df.drop('gt_in_airT',1)
 
 x,y = to_xy(df,'GT_compre_coef')
 #x,y = to_xy(df,'GT_turb_coef')
-
+## ABOVE HERE CHANGED
 #x,y = to_xy(df,['GT_compre_coef','GT_turb_coef'])
 
 X_train, x_test, y_train, y_test = train_test_split(
@@ -152,7 +152,11 @@ validation_monitor = tf.contrib.learn.monitors.ValidationMonitor(
     early_stopping_rounds=200)
 
 	# Need to set batch size
-nn.fit(X_train,y_train,steps=115000,batch_size=BATCH_SIZE,monitors=[validation_monitor])
+nn.fit(X_train,
+	y_train,
+	steps=82700,
+	batch_size=BATCH_SIZE,
+	monitors=[validation_monitor])
 
 
 ev = nn.evaluate(x=x_test, y=y_test, steps=1)
