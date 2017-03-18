@@ -137,10 +137,10 @@ validation_monitor = tf.contrib.learn.monitors.ValidationMonitor(
     early_stopping_rounds=200)
 
 	# Need to set batch size
-# 500 epochs --> (500 * 1503) / 128
+# 5000 epochs --> (5000 * 1503) / 128
 nn.fit(X_train,
 		y_train,
-		steps=5871,
+		steps=58710,
 		batch_size=BATCH_SIZE,
 		monitors=[validation_monitor])
 
