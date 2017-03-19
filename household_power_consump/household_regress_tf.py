@@ -129,7 +129,7 @@ X_train, x_test, y_train, y_test = train_test_split(
     x_out, y_out, test_size=0.20, random_state=42)
 
 # Get/clear a directory to store the neural network to
-model_dir = get_model_dir('airfoil',True)
+model_dir = get_model_dir('household',True)
 
 model_params = {"learning_rate": LEARNING_RATE}
 nn = tf.contrib.learn.Estimator(
@@ -156,18 +156,18 @@ ev = nn.evaluate(x=x_test, y=y_test, steps=1)
 loss_score = ev["loss"]
 print("Loss: %s" % loss_score)
 
-pred = list(nn.predict(x, as_iterable=True))
+pred = list(nn.predict(x_out, as_iterable=True))
 predDF = pd.DataFrame(pred)
 df2 = pd.concat([df,predDF,pd.DataFrame(y)],axis=1)
 
 #df2.columns = list(df.columns)+['pred','ideal']
-print(df2)
+#print(df2)
 
 # Create a Pandas Excel writer using XlsxWriter as the engine.
-writer = pd.ExcelWriter('household_regression_tf.xlsx', engine='xlsxwriter')
+#writer = pd.ExcelWriter('household_regression_tf.xlsx', engine='xlsxwriter')
 
 # Convert the dataframe to an XlsxWriter Excel object.
-df2.to_excel(writer, sheet_name='Sheet1')
+#df2.to_excel(writer, sheet_name='Sheet1')
 
 # Close the Pandas Excel writer and output the Excel file.
-writer.save()
+#writer.save()
