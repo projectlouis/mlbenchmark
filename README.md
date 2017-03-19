@@ -1,6 +1,6 @@
 # mlbenchmark
 
-Code Samples Utilized From: gh/jeffheaton [t81_558_deep_learning github], 
+Code snippets taken From: gh/jeffheaton [t81_558_deep_learning github], 
 
 # Benchmarking Open Source ML Frameworks (TF, Theano, MXNet, &amp; Caffe). Also Matlab Interface for Entry-Level Engineers on ML Framework
 
