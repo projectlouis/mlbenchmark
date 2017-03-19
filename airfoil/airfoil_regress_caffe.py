@@ -12,12 +12,6 @@ import tempfile
 from caffe import layers as cl, params as P
 from caffe.proto import caffe_pb2
 
-#caffe_root = '../'  # this file should be run from {caffe_root}/examples (otherwise change this line)
-#sys.path.insert(0, caffe_root + 'python')
-
-#os.chdir(caffe_root)
-
-
 def solver(train_net_path, test_net_path):
     s = caffe_pb2.SolverParameter()
 
@@ -25,11 +19,11 @@ def solver(train_net_path, test_net_path):
     s.train_net = train_net_path
     s.test_net.append(test_net_path)
 
-    s.test_interval = 1000  # Test after every 1000 training iterations.
-    s.test_iter.append(250) # Test 250 "batches" each time we test.
+    s.test_interval = 100  # Test after every 1000 training iterations.
+    s.test_iter.append(128) # Test 250 "batches" each time we test.
 
 	# 500 Epochs --> (500 Epoch * 1503 # Samples)/(128 Batch Size) = Iterations
-    s.max_iter = 5871      # # of times to update the net (training iterations)
+    s.max_iter = 58710      # # of times to update the net (training iterations)
 
     # Set the initial learning rate for stochastic gradient descent (SGD).
     s.base_lr = 0.001        
@@ -146,30 +140,15 @@ if not os.path.exists(dirname):
 train_filename = os.path.join(dirname, 'train.h5')
 test_filename = os.path.join(dirname, 'test.h5')
 
-# HDF5DataLayer source should be a file containing a list of HDF5 filenames.
-# To show this off, we'll list the same data file twice.
-
 f = h5py.File(train_filename, "w")
 f.create_dataset("data", data=X_train,  compression="gzip", compression_opts=4)
 f.create_dataset("label", data=y_train,  compression="gzip", compression_opts=4)
 f.close()
 
-
-
-#with h5py.File(train_filename, 'w') as f:
-#    f['data'] = X_train
-#    f['label'] = y_train.astype(np.float32)
 with open(os.path.join(dirname, 'train.txt'), 'w') as f:
     f.write(train_filename + '\n')
-#    f.write(train_filename + '\n')
 
 f.close();
-	
-# HDF5 is pretty efficient, but can be further compressed.
-#comp_kwargs = {'compression': 'gzip', 'compression_opts': 1}
-#with h5py.File(test_filename, 'w') as f:
-#    f.create_dataset('data', data=X_test, **comp_kwargs)
-#    f.create_dataset('label', data=y_test.astype(np.float32), **comp_kwargs)
 
 f = h5py.File(test_filename, "w")
 f.create_dataset("data", data=X_test,  compression="gzip", compression_opts=4)
@@ -202,16 +181,3 @@ f.close();
 caffe.set_mode_cpu()
 solver = caffe.get_solver(solver_path)
 solver.solve()
-
-#accuracy = 0
-#batch_size = solver.test_nets[0].blobs['data'].num
-#test_iters = int(len(X_test) / batch_size)
-#for i in range(test_iters):
-#    solver.test_nets[0].forward()
-#    accuracy += solver.test_nets[0].blobs['accuracy'].data
-#accuracy /= test_iters
-
-#print("Accuracy: {:.3f}".format(accuracy))
-
-
-#!./build/tools/caffe train -solver examples/hdf5_classification/mlp_solver.prototxt
