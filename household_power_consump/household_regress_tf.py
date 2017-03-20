@@ -74,7 +74,7 @@ def model_fn(features, targets, mode, params):
     second_hidden_layer = tf.contrib.layers.relu(first_hidden_layer, 512)
     third_hidden_layer = tf.contrib.layers.relu(second_hidden_layer, 256)
     fourth_hidden_layer = tf.contrib.layers.relu(third_hidden_layer, 128)
-    fifth_hidden_layer = tf.contrib.layers.relu(fourth_hidden_layer, 54)
+    fifth_hidden_layer = tf.contrib.layers.relu(fourth_hidden_layer, 64)
     # Connect the output layer to second hidden layer (no activation fn)
     output_layer = tf.contrib.layers.linear(fifth_hidden_layer, 3)
  
@@ -128,6 +128,10 @@ x_out,y_out = to_xy(df,['Sub_metering_1','Sub_metering_2','Sub_metering_3'])
 X_train, x_test, y_train, y_test = train_test_split(
     x_out, y_out, test_size=0.20, random_state=42)
 
+X_train = X_train[:,0:4]
+x_test = x_test[:,0:4]
+x_out = x_out[:,0:4]
+	
 # Get/clear a directory to store the neural network to
 model_dir = get_model_dir('household',True)
 
@@ -164,7 +168,7 @@ df2 = pd.concat([df,predDF,pd.DataFrame(y)],axis=1)
 #print(df2)
 
 # Create a Pandas Excel writer using XlsxWriter as the engine.
-#writer = pd.ExcelWriter('household_regression_tf.xlsx', engine='xlsxwriter')
+#writer = pd.ExcelWriter('household_regression_tf.xlsx', engine='xlsxwriter', options={'constant_memory': True})
 
 # Convert the dataframe to an XlsxWriter Excel object.
 #df2.to_excel(writer, sheet_name='Sheet1')
