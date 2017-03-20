@@ -133,11 +133,15 @@ del df['gt_in_airT']
 #x,y = to_xy(df,'GT_compre_coef')
 #x,y = to_xy(df,'GT_turb_coef')
 ## ABOVE HERE CHANGED
-x,y = to_xy(df,['GT_compre_coef','GT_turb_coef'])
+x_out,y_out = to_xy(df,['GT_compre_coef','GT_turb_coef'])
 
 X_train, x_test, y_train, y_test = train_test_split(
-    x, y, test_size=0.20, random_state=42)
+    x_out, y_out, test_size=0.20, random_state=42)
 
+X_train = X_train[:,0:15]
+x_test = x_test[:,0:15]
+x_out = x_out[:,0:15]
+	
 # Get/clear a directory to store the neural network to
 model_dir = get_model_dir('naval',True)
 
