@@ -153,9 +153,16 @@ validation_monitor = tf.contrib.learn.monitors.ValidationMonitor(
 
 # Need to set batch size
 #100 Epochs
+
+N,M = X_train.shape
+num_epoch = 100
+num_steps = int((N/BATCH_SIZE)*num_epoch)
+
+print("Number of steps: " + str(num_steps))
+
 nn.fit(X_train,
 	y_train,
-	steps=39062,
+	steps=num_steps,
 	batch_size=BATCH_SIZE,
 	monitors=[validation_monitor])
 
@@ -164,18 +171,18 @@ ev = nn.evaluate(x=x_test, y=y_test, steps=1)
 loss_score = ev["loss"]
 print("Loss: %s" % loss_score)
 
-pred = list(nn.predict(x_out, as_iterable=True))
-predDF = pd.DataFrame(pred)
-df2 = pd.concat([df,predDF,pd.DataFrame(y)],axis=1)
+numPartition = 4
 
-#df2.columns = list(df.columns)+['pred','ideal']
-#print(df2)
+new_xout = np.array_split(x_out,numPartition)
+new_yout = np.array_split(y_out,numPartition)
 
-# Create a Pandas Excel writer using XlsxWriter as the engine.
-#writer = pd.ExcelWriter('household_regression_tf.xlsx', engine='xlsxwriter', options={'constant_memory': True})
+new_df = np.array_split(df,numPartition)
 
-# Convert the dataframe to an XlsxWriter Excel object.
-#df2.to_excel(writer, sheet_name='Sheet1')
+for ji in range(0,numPartition):
+    pred = list(nn.predict(new_xout[ji], as_iterable=True))
+    predDF = pd.DataFrame(pred)
+    df2 = pd.concat([new_df[ji],predDF,pd.DataFrame(new_yout[ji])],axis=1)
 
-# Close the Pandas Excel writer and output the Excel file.
-#writer.save()
+    print('Starting to write to csv file')
+
+    df2.to_csv("household_regression_tf" + str(ji) + ".csv", chunksize=1000)
