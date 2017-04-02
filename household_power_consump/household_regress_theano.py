@@ -1,6 +1,5 @@
 import theano
 from theano import tensor as T
-from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 import numpy as np
 import pandas as pd
 import os
@@ -14,38 +13,32 @@ from nolearn.lasagne import TrainSplit
 from lasagne import nonlinearities
 import time
 
-srng = RandomStreams()
-
-
 def build_mlp(input_var=None):
 ## The input # needs to change according to # of inputs
-    l_in = lasagne.layers.InputLayer(shape=(None, 4), input_var=input_var)
+    l_in = lasagne.layers.InputLayer(shape=(None, 6), input_var=input_var)
     l_hid1 = lasagne.layers.DenseLayer(
-            l_in, num_units=1024,
+            l_in, num_units=64,
             nonlinearity=nonlinearities.rectify)
     l_hid2 = lasagne.layers.DenseLayer(
             l_hid1, num_units=512,
             nonlinearity=nonlinearities.rectify)
     l_hid3 = lasagne.layers.DenseLayer(
-            l_hid2, num_units=256,
+            l_hid2, num_units=1024,
             nonlinearity=nonlinearities.rectify)
     l_hid4 = lasagne.layers.DenseLayer(
             l_hid3, num_units=128,
             nonlinearity=nonlinearities.rectify)
-    l_hid5 = lasagne.layers.DenseLayer(
-            l_hid4, num_units=64,
-            nonlinearity=nonlinearities.rectify)
     l_out = lasagne.layers.DenseLayer(
-            l_hid5, num_units=3,
+            l_hid4, num_units=1,
             nonlinearity=None)
 			
     net = NeuralNet(l_out, 
 					regression=True,
 					update_learning_rate = 0.000001,
 					batch_iterator_train = BatchIterator(batch_size=512),
-					batch_iterator_test = BatchIterator(batch_size=500),
+					batch_iterator_test = BatchIterator(batch_size=512),
 					update=lasagne.updates.adam,
-					max_epochs = 10,
+					max_epochs = 100,
 					train_split = TrainSplit(eval_size=0.2),
 					objective_loss_function = lasagne.objectives.squared_error,
 					verbose=1)
@@ -110,25 +103,22 @@ df = pd.read_csv(filename_read,skiprows=1,na_values=['NA','?'])
 encode_numeric_zscore(df,'Global_active_power')
 encode_numeric_zscore(df,'Global_reactive_power')
 encode_numeric_zscore(df,'Global_intensity')
-encode_numeric_zscore(df,'Voltage')
+#encode_numeric_zscore(df,'Voltage')
+encode_numeric_zscore(df,'Sub_metering_1')
+encode_numeric_zscore(df,'Sub_metering_2')
+encode_numeric_zscore(df,'Sub_metering_3')
 
 del df['Date']
 del df['Time']
 
 print(df)
 
-x_out,y_out = to_xy(df,['Sub_metering_1','Sub_metering_2','Sub_metering_3'])
+x_out,y_out = to_xy(df,'Voltage')
 
 ## ABOVE HERE CHANGED
 X_train, x_test, y_train, y_test = train_test_split(
     x_out, y_out, test_size=0, random_state=42)
 
-X_train = X_train[:,0:4]
-x_test = x_test[:,0:4]
-x_out = x_out[:,0:4]
-	
-print(X_train.shape)
-print(y_train.shape)
 	
 X = T.matrix()
 Y = T.matrix()
@@ -142,20 +132,22 @@ network.fit(X_train,y_train);
 print(network.score(X_train,y_train));
 
 
-pred = list(network.predict(x_out));
-predDF = pd.DataFrame(pred)
-df2 = pd.concat([df,predDF,pd.DataFrame(y_out)],axis=1)
+numPartition = 8
 
-#df2.columns = list(df.columns)+['pred','ideal']
-#print(df2)
+new_xout = np.array_split(x_out,numPartition)
+new_yout = np.array_split(y_out,numPartition)
 
-valid_loss = np.array([i["valid_loss"] for i in network.train_history_])
+new_df = np.array_split(df,numPartition)
 
-# Create a Pandas Excel writer using XlsxWriter as the engine.
-writer = pd.ExcelWriter('household_regression_theano_multioutput.xlsx', engine='xlsxwriter', options={'constant_memory': True})
+for ji in range(0,numPartition):
+	print('Starting to predict')
+	
+	pred = list(network.predict(new_xout[ji]));
+    
+	predDF = pd.DataFrame(pred)
+	df2 = pd.concat([new_df[ji],predDF,pd.DataFrame(new_yout[ji])],axis=1)
 
-# Convert the dataframe to an XlsxWriter Excel object.
-df2.to_excel(writer, sheet_name='Sheet1')
+	print('Starting to write to csv file')
+	df2.to_csv("household_regression_theano" + str(ji) + ".csv", chunksize=1000)
 
-# Close the Pandas Excel writer and output the Excel file.
-writer.save()
+
