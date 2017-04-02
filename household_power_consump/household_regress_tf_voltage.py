@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
+
 # Encode a numeric column as zscores
 def encode_numeric_zscore(df,name,mean=None,sd=None):
     if mean is None:
@@ -70,10 +71,10 @@ def get_model_dir(name,erase):
 def model_fn(features, targets, mode, params):
   # Connect the first hidden layer to input layer
   # (features) with relu activation
-    first_hidden_layer = tf.contrib.layers.relu(features, 128)
+    first_hidden_layer = tf.contrib.layers.relu(features, 64)
     second_hidden_layer = tf.contrib.layers.relu(first_hidden_layer, 512)
-    third_hidden_layer = tf.contrib.layers.relu(second_hidden_layer, 256)
-    fourth_hidden_layer = tf.contrib.layers.relu(third_hidden_layer, 64)
+    third_hidden_layer = tf.contrib.layers.relu(second_hidden_layer, 1024)
+    fourth_hidden_layer = tf.contrib.layers.relu(third_hidden_layer, 128)
     # Connect the output layer to second hidden layer (no activation fn)
     output_layer = tf.contrib.layers.linear(fourth_hidden_layer, 1)
  
@@ -131,7 +132,6 @@ X_train, x_test, y_train, y_test = train_test_split(
     x_out, y_out, test_size=0.20, random_state=42)
 
 
-print(df)
 print(y_train.shape)
 print(X_train.shape)
     
@@ -171,7 +171,7 @@ ev = nn.evaluate(x=x_test, y=y_test, steps=1)
 loss_score = ev["loss"]
 print("Loss: %s" % loss_score)
 
-numPartition = 4
+numPartition = 8
 
 new_xout = np.array_split(x_out,numPartition)
 new_yout = np.array_split(y_out,numPartition)
@@ -179,6 +179,7 @@ new_yout = np.array_split(y_out,numPartition)
 new_df = np.array_split(df,numPartition)
 
 for ji in range(0,numPartition):
+    print('Starting to predict')
     pred = list(nn.predict(new_xout[ji], as_iterable=True))
     predDF = pd.DataFrame(pred)
     df2 = pd.concat([new_df[ji],predDF,pd.DataFrame(new_yout[ji])],axis=1)
@@ -186,3 +187,15 @@ for ji in range(0,numPartition):
     print('Starting to write to csv file')
 
     df2.to_csv("household_regression_tf" + str(ji) + ".csv", chunksize=1000)
+
+#df2.columns = list(df.columns)+['pred','ideal']
+#print(df2)
+
+# Create a Pandas Excel writer using XlsxWriter as the engine.
+#writer = pd.ExcelWriter('household_regression_tf.xlsx', engine='xlsxwriter', options={'constant_memory': True})
+
+# Convert the dataframe to an XlsxWriter Excel object.
+#df2.to_excel(writer, sheet_name='Sheet1')
+
+# Close the Pandas Excel writer and output the Excel file.
+#writer.save()
