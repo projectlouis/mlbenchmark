@@ -15,13 +15,13 @@ def build_mlp():
 	outLabl = mx.sym.Variable('softmax_label')
 	data = mx.symbol.Variable('data')
 	flat = mx.symbol.Flatten(data=data)
-	fc1  = mx.symbol.FullyConnected(data = flat, name='fc1', num_hidden=128)
+	fc1  = mx.symbol.FullyConnected(data = flat, name='fc1', num_hidden=64)
 	act1 = mx.symbol.Activation(data = fc1, name='relu1', act_type="relu")
 	fc2  = mx.symbol.FullyConnected(data = act1, name='fc2', num_hidden=512)
 	act2 = mx.symbol.Activation(data = fc2, name='relu2', act_type="relu")
-	fc3  = mx.symbol.FullyConnected(data = act2, name='fc3', num_hidden=256)
+	fc3  = mx.symbol.FullyConnected(data = act2, name='fc3', num_hidden=1024)
 	act3 = mx.symbol.Activation(data = fc3, name='relu3', act_type="relu")
-	fc4  = mx.symbol.FullyConnected(data = act3, name='fc4', num_hidden=64)
+	fc4  = mx.symbol.FullyConnected(data = act3, name='fc4', num_hidden=128)
 	act4 = mx.symbol.Activation(data = fc4, name='relu4', act_type="relu")
 	fc5  = mx.symbol.FullyConnected(data = act4, name='fc5', num_hidden=1)
 	net  = mx.symbol.LinearRegressionOutput(data=fc5, label=outLabl, name='linreg1')
@@ -94,7 +94,7 @@ encode_numeric_zscore(df,'Sub_metering_3')
 del df['Date']
 del df['Time']
 
-print(df)
+#print(df)
 
 x_out,y_out = to_xy(df,'Voltage')
 ## ABOVE HERE CHANGED
@@ -103,7 +103,7 @@ x_out,y_out = to_xy(df,'Voltage')
 X_train, X_test, y_train, y_test = train_test_split(
     x_out, y_out, test_size=0.20, random_state=42)
 
-print(df)
+#print(df)
 print(y_train.shape)
 print(X_train.shape)
 	
@@ -133,24 +133,22 @@ model.fit(trainIter,
 		  eval_metric='mse',
 		  optimizer='adam')
 
-		  
-# Create a ND Iter Format
-#predIter = mx.io.NDArrayIter(data = x_out, batch_size = BATCH_SIZE)
+numPartition = 8
 
-#pred = model.predict(predIter);
+new_xout = np.array_split(x_out,numPartition)
+new_yout = np.array_split(y_out,numPartition)
 
-#predDF = pd.DataFrame(pred.asnumpy())
-#df2 = pd.concat([df,predDF,pd.DataFrame(y_out)],axis=1)
+new_df = np.array_split(df,numPartition)
 
-#df2.columns = list(df.columns)+['pred','ideal']
-#print(df2)
+for ji in range(0,numPartition):
+	print('Starting to predict')
+	predIter = mx.io.NDArrayIter(data = new_xout[ji], batch_size = BATCH_SIZE)
+	pred = model.predict(predIter);
+    
+	predDF = pd.DataFrame(pred.asnumpy())
+	df2 = pd.concat([new_df[ji],predDF,pd.DataFrame(new_yout[ji])],axis=1)
+
+	print('Starting to write to csv file')
+	df2.to_csv("household_regression_mxnet" + str(ji) + ".csv", chunksize=1000)
 
 
-# Create a Pandas Excel writer using XlsxWriter as the engine.
-#writer = pd.ExcelWriter('naval_regression_mxnet.xlsx', engine='xlsxwriter')
-
-# Convert the dataframe to an XlsxWriter Excel object.
-#df2.to_excel(writer, sheet_name='Sheet1')
-
-# Close the Pandas Excel writer and output the Excel file.
-#writer.save()
